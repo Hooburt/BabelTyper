@@ -1,0 +1,49 @@
+body { 
+    font-family: sans-serif;
+    background: rgb(0, 0, 0); 
+    color:aqua
+}
+
+.text-art {
+  background-color: rgb(19, 19, 19);
+  font-family: monospace;
+  font-size: .75rem;
+  line-height: 1;
+  overflow: clip;
+  padding: 1rem;
+  white-space: pre;
+  margin: auto;
+  width: 400px;
+  padding: 10px;
+  color:rgb(207, 0, 0);
+  border: thick double rgba(255, 0, 0, 0.411);
+}
+
+.shop-div {
+  vertical-align: top;
+  width: 500px;
+  height: 200px;
+  margin-left: 5px;
+  padding: 10px;
+}
+
+.game-canvas {
+    background-color:rgb(19, 19, 19);
+}
+
+.selected {
+  border: thick double rgb(218, 0, 0);
+}
+
+.notselected {
+  border: thick double rgb(80, 0, 0);
+}
+
+.row{
+  display: flex
+}
+
+.inlinerow{
+  display: flex;
+  column-gap: 20px;
+}
