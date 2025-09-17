@@ -34,10 +34,6 @@ const charGenerator = (modeFlags: string[]): string => {
 }
 
 
-const handleInputs = (char: string,inputs: string[]) => {
-    return 
-}
-
 export interface Track {
     text: string;
     flags: string[];

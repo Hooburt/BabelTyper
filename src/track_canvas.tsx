@@ -1,4 +1,5 @@
-import {useRef, useEffect, RefObject} from "react";
+import {useRef, useEffect} from "react";
+import { useGame } from "./GameContext"
 import { Engine } from "./engine";
 import { render } from "./renderer";
 import { KeyEvent } from "./app";
@@ -9,28 +10,21 @@ type Point = {
     text: string;
 }
 
-interface CanvasProps {
+interface TrackCanvasProps {
     width: number;
     height: number;
-    engineRef: React.RefObject<Engine | null>;
-    lastKey: KeyEvent | null;
     className: string
 }
 
 let dirty = true
 
-const TrackCanvas = ({ width, height, engineRef, lastKey, className}: CanvasProps) => {
+const TrackCanvas = ({ width, height, className }: TrackCanvasProps) => {
     const canvasRef = useRef<HTMLCanvasElement | null> (null);
-    
-    function addTrack (): void {
-
-        return;
-    }
+    const { engineRef } = useGame();
 
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-
         const ctx = canvas.getContext("2d");
         if(!ctx) return;
 
