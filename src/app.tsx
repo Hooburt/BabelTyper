@@ -4,6 +4,7 @@ import TrackCanvas from "./track_canvas";
 import ShopMenu from "./shop";
 import { GameProvider, useGame } from "./GameContext";
 import "./app.css";
+import { FlagDisplay } from "./FlagDisplay";
 
 const GlobalKeyListener = ({ onKey }: { onKey: (key: string) => void }) => {
   useEffect(() => {
@@ -26,7 +27,7 @@ const GlobalKeyListener = ({ onKey }: { onKey: (key: string) => void }) => {
 };
 
 const TextArt = ({ text }: { text: string }) => {
-  return <pre clas||sName="text-art">{text}</pre>;
+  return <pre className="text-art">{text}</pre>;
 };
 
 export const ScoreContext = React.createContext(0);
@@ -72,6 +73,8 @@ function App(): React.JSX.Element {
             curTarget === 0 ? "game-canvas selected" : "game-canvas notselected"
           }
         />
+        <FlagDisplay />
+
         <ShopMenu
           trackSelectNum={trackSelect}
           rangeNum={rangeNum}
