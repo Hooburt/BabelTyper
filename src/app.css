@@ -1,21 +1,21 @@
-body { 
-    font-family: sans-serif;
-    background: rgb(0, 0, 0); 
-    color:aqua
+body {
+  font-family: sans-serif;
+  background: rgb(0, 0, 0);
+  color: aqua;
 }
 
 .text-art {
   background-color: rgb(19, 19, 19);
   font-family: monospace;
-  font-size: .75rem;
+  font-size: 0.75rem;
   line-height: 1;
   overflow: clip;
   padding: 1rem;
   white-space: pre;
   margin: auto;
-  width: 400px;
+  width: fit-content;
   padding: 10px;
-  color:rgb(207, 0, 0);
+  color: rgb(207, 0, 0);
   border: thick double rgba(255, 0, 0, 0.411);
 }
 
@@ -28,7 +28,7 @@ body {
 }
 
 .game-canvas {
-    background-color:rgb(19, 19, 19);
+  background-color: rgb(19, 19, 19);
 }
 
 .selected {
@@ -39,11 +39,11 @@ body {
   border: thick double rgb(80, 0, 0);
 }
 
-.row{
-  display: flex
+.row {
+  display: flex;
 }
 
-.inlinerow{
+.inlinerow {
   display: flex;
   column-gap: 20px;
 }

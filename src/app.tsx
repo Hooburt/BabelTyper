@@ -3,96 +3,93 @@ import ReactDOM from "react-dom/client";
 import TrackCanvas from "./track_canvas";
 import ShopMenu from "./shop";
 import { GameProvider, useGame } from "./GameContext";
-import './app.css';
-
+import "./app.css";
 
 const GlobalKeyListener = ({ onKey }: { onKey: (key: string) => void }) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        console.log("Tabby");
+      }
+      onKey(e.key);
+    };
 
-    useEffect(() => {
-        
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if(e.key === "Tab") {
-                e.preventDefault();
-                console.log("Tabby");
-            }
-            onKey(e.key);
-        };
+    window.addEventListener("keydown", handleKeyDown);
 
-        window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onKey]);
 
-        return () => {
-            window.removeEventListener("keydown", handleKeyDown);
-        };
-
-    }, [onKey]);
-
-    return null;
+  return null;
 };
 
-
-const TextArt = (label: string, text: string) => {
-    return (
-      <pre
-        aria-label={label}
-        className="text-art"
-      >{text}</pre>
-    );
+const TextArt = ({ text }: { text: string }) => {
+  return <pre clas||sName="text-art">{text}</pre>;
 };
-
 
 export const ScoreContext = React.createContext(0);
 
 export type KeyEvent = { key: string; target: number; time: number };
 
 function App(): React.JSX.Element {
-    const { engineRef, score, trackSelect, rangeNum, incrementNum } = useGame();
-    const [lastKey, setLastKey] = useState<KeyEvent | null>(null);
-    const [curTarget, setCurTarget] = useState(0);
-    const logo = "                                ___                           \r\n_-_ _,,         ,,          ,, -   ---___-                    \r\n   -/  )    _   ||          ||    (' ||                       \r\n  ~||_<    < \\, ||/|,  _-_  ||   ((  ||    '\\\\/\\\\ -_-_   _-_  \r\n   || \\\\   /-|| || || || \\\\ ||  ((   ||     || ;' || \\\\ || \\\\ \r\n   ,/--|| (( || || |' ||/   ||   (( //      ||/   || || ||/   \r\n  _--_-'   \\/\\\\ \\\\/   \\\\,/  \\\\     -____-   |/    ||-'  \\\\,/  \r\n (                                         (      |/          \r\n                                            -_-   '           "
+  const { engineRef, score, trackSelect, rangeNum, incrementNum } = useGame();
+  const [lastKey, setLastKey] = useState<KeyEvent | null>(null);
+  const [curTarget, setCurTarget] = useState(0);
+  const logo =
+    "                                ___                           \r\n_-_ _,,         ,,          ,, -   ---___-                    \r\n   -/  )    _   ||          ||    (' ||                       \r\n  ~||_<    < \\, ||/|,  _-_  ||   ((  ||    '\\\\/\\\\ -_-_   _-_  \r\n   || \\\\   /-|| || || || \\\\ ||  ((   ||     || ;' || \\\\ || \\\\ \r\n   ,/--|| (( || || |' ||/   ||   (( //      ||/   || || ||/   \r\n  _--_-'   \\/\\\\ \\\\/   \\\\,/  \\\\     -____-   |/    ||-'  \\\\,/  \r\n (                                         (      |/          \r\n                                            -_-   '           ";
 
-    const handleKey = (key: KeyEvent) => {
-        setLastKey(key);
-        engineRef.current?.addInput(key);
-    }
+  const handleKey = (key: KeyEvent) => {
+    setLastKey(key);
+    engineRef.current?.addInput(key);
+  };
 
-    return (
+  return (
     <div>
-        <GlobalKeyListener 
-            onKey={(key) => {
-                if(key === "Tab") {
-                    setCurTarget((t) => (t === 0 ? 1 : 0))
-                    return;
-                }
-                handleKey({key, target: curTarget, time: Date.now()});
-            }}
+      <GlobalKeyListener
+        onKey={(key) => {
+          if (key === "Tab") {
+            setCurTarget((t) => (t === 0 ? 1 : 0));
+            return;
+          }
+          handleKey({ key, target: curTarget, time: Date.now() });
+        }}
+      />
+      <div>
+        <TextArt text={logo} />
+      </div>
+      <div>
+        <p>Key: {lastKey?.key}</p>
+        <p>Score: {score}</p>
+      </div>
+
+      <div className="row">
+        <TrackCanvas
+          width={800}
+          height={15}
+          className={
+            curTarget === 0 ? "game-canvas selected" : "game-canvas notselected"
+          }
         />
-        <div>{TextArt("Yep",logo)}</div>
-        <div>
-            <p>Key: {lastKey?.key}</p>
-            <p>Score: {score}</p>
-        </div>
-        <div className="row">
-            <TrackCanvas
-                width={800}
-                height={15}
-                className={curTarget === 0 ? "game-canvas selected" : "game-canvas notselected"}
-            />
-            <ShopMenu
-                trackSelectNum={trackSelect} 
-                rangeNum={rangeNum} 
-                incrNum={incrementNum}
-                className={curTarget === 1 ? "shop-div selected" : "shop-div notselected"} 
-            />
-        </div>
+        <ShopMenu
+          trackSelectNum={trackSelect}
+          rangeNum={rangeNum}
+          incrNum={incrementNum}
+          className={
+            curTarget === 1 ? "shop-div selected" : "shop-div notselected"
+          }
+        />
+      </div>
     </div>
-    );
+  );
 }
 
 const root = document.getElementById("root");
 if (root) {
-    ReactDOM.createRoot(root).render(
-        <GameProvider>
-        <App />
-        </GameProvider>
-    );
+  ReactDOM.createRoot(root).render(
+    <GameProvider>
+      <App />
+    </GameProvider>
+  );
 }
