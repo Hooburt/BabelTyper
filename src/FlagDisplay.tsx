@@ -10,8 +10,6 @@ export const FlagDisplay = () => {
     return <div className="">... loading engine</div>;
   }
 
-  console.log(engineRef.current.tracks);
-
   return (
     <div
       style={{
@@ -22,6 +20,7 @@ export const FlagDisplay = () => {
     >
       {engineRef.current.tracks.map((track) => (
         <div
+          key={"" + track.x + track.y}
           className=""
           style={{
             height: trackFontSize + "px",
@@ -34,9 +33,10 @@ export const FlagDisplay = () => {
         >
           {track.flags.map((flag) => (
             <span
+              key={flag}
               style={{
+                color: "white",
                 fontSize: "1rem",
-                // fontSize: trackFontSize - 1 + "px",
               }}
             >
               {flag}

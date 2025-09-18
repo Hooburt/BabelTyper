@@ -49,7 +49,8 @@ const ShopMenu = ({
         Upgrade track {trackSelectNum.toString().padStart(3, "0")} and{" "}
         {rangeNum.toString().padStart(3, "0")} following.
       </p>
-      <div className="inlinerow">{buildUpgradeList()}</div>
+      <hr />
+      <div className="">{buildUpgradeList()}</div>
     </div>
   );
 };

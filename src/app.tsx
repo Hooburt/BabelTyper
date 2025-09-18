@@ -30,8 +30,6 @@ const TextArt = ({ text }: { text: string }) => {
   return <pre className="text-art">{text}</pre>;
 };
 
-export const ScoreContext = React.createContext(0);
-
 export type KeyEvent = { key: string; target: number; time: number };
 
 function App(): React.JSX.Element {
@@ -73,6 +71,7 @@ function App(): React.JSX.Element {
             curTarget === 0 ? "game-canvas selected" : "game-canvas notselected"
           }
         />
+
         <FlagDisplay />
 
         <ShopMenu

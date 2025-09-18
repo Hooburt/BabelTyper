@@ -24,11 +24,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   children: React.ReactNode;
 }) => {
   const engineRef = useRef<Engine>(
-    new Engine(window.innerWidth, window.innerHeight, 100)
+    new Engine(window.innerWidth, window.innerHeight, 10)
   );
 
   // UI States
-  const [score, setScore] = useState(0);
+  const [score, setScore] = useState(1000);
   const [upgrades, setUpgrades] = useState<Upgrade[]>([]);
   const [trackSelect, setTrackSelect] = useState(0);
   const [rangeNum, setRangeNum] = useState(0);

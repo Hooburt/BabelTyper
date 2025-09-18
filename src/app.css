@@ -22,7 +22,7 @@ body {
 .shop-div {
   vertical-align: top;
   width: 500px;
-  height: 200px;
+  height: fit-content;
   margin-left: 5px;
   padding: 10px;
 }
@@ -46,4 +46,5 @@ body {
 .inlinerow {
   display: flex;
   column-gap: 20px;
+  flex-direction: row;
 }
