@@ -201,6 +201,11 @@ export class Engine {
       },
   ];
 
+  setScore(newScore: number) {
+    this.score = newScore;
+    this.onScoreChange?.(newScore);
+  }
+
   setTrackSelect(newRow: number) {
     this.trackSelect = newRow;
     this.onTrackSelectChange?.(newRow);
@@ -238,6 +243,7 @@ export class Engine {
       );
       //console.log("Created track at: x: ", 10, " y:", 15+i*25 )
     }
+    this.setScore(this.score);
   }
 
   addInput(input: KeyEvent) {
@@ -270,8 +276,7 @@ export class Engine {
           t.text = t.text.slice(1);
           t.text += charGenerator(t.flags);
           t.dirty = true;
-          this.score++;
-          this.onScoreChange?.(this.score);
+          this.setScore(this.score + 1);
         } else if (event.target === 1) {
           // Handle events for shop
 
@@ -322,8 +327,7 @@ export class Engine {
               //   (upg.baseCost + upg.baseCost * upg.costMult * upg.owned) *
               //   this.incrementNum;
               if (this.score >= upg.costCalculation(this.incrementNum)) {
-                this.score -= upg.costCalculation(this.incrementNum);
-                this.onScoreChange?.(this.score);
+                this.setScore(this.score - upg.costCalculation(this.incrementNum));
                 upg.owned += this.incrementNum;
                 this.dirty = true;
                 upg.buyUpgrade(
