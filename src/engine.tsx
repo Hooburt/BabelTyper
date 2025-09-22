@@ -4,9 +4,16 @@ interface StringGeneratorProps {
   length: number;
 }
 
-const stringGenerator = ({ length }: StringGeneratorProps) => {
+const flagLookup = (flag: string) => {
+    if(flag === 'l') return 0;
+    if(flag === 'n') return 1;
+    if(flag === 's') return 2;
+    return -1;
+}
+
+const stringGenerator = ({ length }: StringGeneratorProps, flags:string[]=[]) => {
   let outString = "";
-  for (let i = 0; i < length; i++) outString += charGenerator([]);
+  for (let i = 0; i < length; i++) outString += charGenerator(flags);
   return outString;
 };
 
@@ -24,10 +31,24 @@ const charGenerator = (modeFlags: string[]): string => {
     }
     return true;
   }
-
   // Range 33 - 126
-  const randomChar = Math.floor(Math.random() * 93 + 33);
-  const charOut = String.fromCharCode(randomChar);
+  let selectedChar = 0;
+  if(modeFlags[flagLookup("s")] != null && modeFlags[flagLookup("n")] != null) {
+    const snCandidateOne = Math.floor(Math.random() * 25 + 65) // Candidates [A-Z]
+    const snCandidateTwo = Math.floor(Math.random() * 25 + 97) // Candidates [a-z]
+    Math.floor(Math.random() * 2) === 0 ? selectedChar = snCandidateOne : selectedChar = snCandidateTwo;
+  }
+  else if(modeFlags[flagLookup("n")] != null) {
+    const nCandidateOne = Math.floor(Math.random() * 69 + 58); // Candidates [:-~]
+    const nCandidateTwo = Math.floor(Math.random() * 15 + 33); // Candidates [!-/]
+    Math.floor(Math.random() * 2) === 0 ? selectedChar = nCandidateOne : selectedChar = nCandidateTwo;
+  }
+  else {
+    selectedChar = Math.floor(Math.random() * 93 + 33); // Candidates [!-~]
+  }
+
+
+  const charOut = String.fromCharCode(selectedChar);
   if (modeFlags.includes("l") && isAlphaNumeric(charOut)) {
     return charOut.toLowerCase();
   }
@@ -50,8 +71,11 @@ class Track {
   }
 
   addFlag(flag: string) {
-    if (this.flags.includes(flag)) return false;
-    this.flags.push(flag);
+    const lookUp = flagLookup(flag);
+    if(lookUp === -1) return false;
+    if (this.flags[lookUp] === flag) return false;
+    this.flags[lookUp] = flag;
+    this.dirty = true;
     return true; // TODO: penis
   }
 }
@@ -115,8 +139,12 @@ export class Engine {
       description: "to [l]ower case",
       buyUpgrade: (increment, trackFrom, following) => {
         this.tracks
-          .filter((_, index) => index >= trackFrom && index < following)
-          .forEach((track) => track.addFlag("l"));
+          .filter((_, index) => index >= trackFrom && index <= trackFrom + following)
+          .forEach((track) => {
+            if (track.addFlag("l")) {
+                track.text = stringGenerator({length: 240}, track.flags);
+            }
+        })
       },
       costCalculation: function (incr) {
         if (this.owned === 0 || this.owned == 1) return this.baseCost;
@@ -131,11 +159,15 @@ export class Engine {
       baseCost: 10,
       costMult: 1.8,
       owned: 0,
-      description: "to [n]number",
+      description: "remove [n]numbers",
       buyUpgrade: (increment, trackFrom, following) => {
         this.tracks
-          .filter((_, index) => index >= trackFrom && index < following)
-          .forEach((track) => track.addFlag("n"));
+          .filter((_, index) => index >= trackFrom && index <= trackFrom + following)
+          .forEach((track) => {
+            if (track.addFlag("n")) {
+                track.text = stringGenerator({length: 240}, track.flags);
+                }
+            })
       },
       costCalculation: function (incr) {
         if (this.owned === 0 || this.owned == 1) return this.baseCost;
@@ -144,6 +176,29 @@ export class Engine {
         );
       },
     },
+    {
+        id: 3,
+        hotkey: "s",
+        baseCost: 10,
+        costMult: 1.8,
+        owned: 0,
+        description: "remove [s]ymbols non-alphanumeric",
+        buyUpgrade: (increment, trackFrom, following) => {
+          this.tracks
+            .filter((_, index) => index >= trackFrom && index <= trackFrom + following)
+            .forEach((track) => {
+                if(track.addFlag("s")) {
+                    track.text = stringGenerator({length: 240}, track.flags);
+                }
+        })
+        },
+        costCalculation: function (incr) {
+          if (this.owned === 0 || this.owned == 1) return this.baseCost;
+          return Math.round(
+            this.baseCost + this.owned * this.baseCost * this.costMult * incr
+          );
+        },
+      },
   ];
 
   setTrackSelect(newRow: number) {
@@ -208,7 +263,6 @@ export class Engine {
   update(delta: number) {
     while (this.inputBuffer.length > 0) {
       const event = this.inputBuffer.shift()!;
-      console.log(event);
 
       for (const t of this.tracks) {
         if (event.target === 0 && t.text && t.text[0] == event.key) {

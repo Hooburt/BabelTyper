@@ -58,8 +58,9 @@ const TrackCanvas = ({ width, height, className }: TrackCanvasProps) => {
       }
 
       const padding = 3.5;
+      const lastTrack = (engine.tracks.length <= 25 ? engine.tracks.length - 1 : 25)
       const collapseHeight =
-        engine.tracks[24].y + padding * 2;
+        engine.tracks[lastTrack].y + padding * 2;
       const computedHeight =
         engine.tracks[engine.tracks.length - 1].y + padding * 2;
 

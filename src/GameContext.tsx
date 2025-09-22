@@ -24,7 +24,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   children: React.ReactNode;
 }) => {
   const engineRef = useRef<Engine>(
-    new Engine(window.innerWidth, window.innerHeight, 2000)
+    new Engine(window.innerWidth, window.innerHeight, 20)
   );
 
   // UI States
