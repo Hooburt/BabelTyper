@@ -39,12 +39,14 @@ class Track {
   flags: string[];
   x: number;
   y: number;
+  dirty: boolean;
 
   constructor(text: string, x: number, y: number, flags: string[] = []) {
     this.flags = flags;
     this.text = text;
     this.x = x;
     this.y = y;
+    this.dirty = true;
   }
 
   addFlag(flag: string) {
@@ -163,6 +165,13 @@ export class Engine {
     return this.upgradeList;
   }
 
+  dirtyTo(num: number) {
+    for(let i=0;i<num;i++) {
+        this.tracks[i].dirty = true;
+        console.log("i: ", this.tracks[i]);
+    }
+  }
+
   constructor(width: number, height: number, trackNum: number) {
     this.width = width;
     this.height = height;
@@ -172,6 +181,7 @@ export class Engine {
       this.tracks.push(
         new Track(stringGenerator({ length: 240 }), 10, 15 + i * 25)
       );
+      //console.log("Created track at: x: ", 10, " y:", 15+i*25 )
     }
   }
 
@@ -205,6 +215,7 @@ export class Engine {
           // Handle events for tracks
           t.text = t.text.slice(1);
           t.text += charGenerator(t.flags);
+          t.dirty = true;
           this.score++;
           this.onScoreChange?.(this.score);
         } else if (event.target === 1) {
