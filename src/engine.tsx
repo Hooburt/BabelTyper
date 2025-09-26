@@ -55,19 +55,47 @@ const charGenerator = (modeFlags: string[]): string => {
   return charOut;
 };
 
+class Monkey {
+  assignedTrack: Track;
+  monkeyBuffer: String[] = [];
+
+  constructor(t: Track) {
+    this.assignedTrack = t;
+  }
+
+  addChar(adaptive: boolean) {
+    if(adaptive) {
+      this.monkeyBuffer.push(charGenerator(this.assignedTrack.flags))
+    }
+    else {
+      this.monkeyBuffer.push(charGenerator([]));
+    }
+    //console.log("Monkey on track ", this.assignedTrack.id, " buffer: ", this.monkeyBuffer);
+  }
+
+  getMonkeyBuffer() {
+    return this.monkeyBuffer;
+  }
+
+}
+
 class Track {
+  id: number;
   text: string;
   flags: string[];
   x: number;
   y: number;
   dirty: boolean;
+  monkeys: Monkey[];
 
-  constructor(text: string, x: number, y: number, flags: string[] = []) {
+  constructor(id: number ,text: string, x: number, y: number, flags: string[] = []) {
+    this.id = id;
     this.flags = flags;
     this.text = text;
     this.x = x;
     this.y = y;
     this.dirty = true;
+    this.monkeys = [];
   }
 
   addFlag(flag: string) {
@@ -78,7 +106,40 @@ class Track {
     this.dirty = true;
     return true; // TODO: penis
   }
+
+  addMonkey() {
+    const out = new Monkey(this);
+    this.monkeys.push(
+      out
+    );
+    console.log(this.monkeys);
+    return out;
+  }
+
+  applyMonkey() {
+    if(this.monkeys.length === 0) {
+      console.warn("No monkeys, returning")
+      return 0;
+    }
+    //console.log("Applying monkey on track ", this.id)
+    var appliedCounter = 0;
+    this.monkeys.forEach((m) => {
+      const buffer = m.monkeyBuffer;
+      for(var i in buffer) {
+        if(buffer[i] === this.text[0]) {
+          appliedCounter += 1;
+          this.text = this.text.slice(1)
+          this.text += charGenerator(this.flags);
+          console.warn("Hit on track: ", this.id, " with key ", buffer[i]);
+        }
+      }
+      m.monkeyBuffer = [];
+    })
+    return appliedCounter;
+  }
 }
+
+
 
 export type Upgrade = {
   id: number;
@@ -99,6 +160,8 @@ export class Engine {
   tracks: Track[] = [];
   width: number;
   height: number;
+  tickCount: number = 1;
+  monkeyTickRate: number = 100;
   trackNum: number = 1;
   inputBuffer: KeyEvent[] = [];
   score: number = 1000;
@@ -177,29 +240,52 @@ export class Engine {
       },
     },
     {
-        id: 3,
-        hotkey: "s",
-        baseCost: 10,
-        costMult: 1.8,
-        owned: 0,
-        description: "remove [s]ymbols non-alphanumeric",
-        buyUpgrade: (increment, trackFrom, following) => {
-          this.tracks
-            .filter((_, index) => index >= trackFrom && index <= trackFrom + following)
-            .forEach((track) => {
-                if(track.addFlag("s")) {
-                    track.text = stringGenerator({length: 240}, track.flags);
-                }
-        })
-        },
-        costCalculation: function (incr) {
-          if (this.owned === 0 || this.owned == 1) return this.baseCost;
-          return Math.round(
-            this.baseCost + this.owned * this.baseCost * this.costMult * incr
-          );
-        },
+      id: 3,
+      hotkey: "s",
+      baseCost: 10,
+      costMult: 1.8,
+      owned: 0,
+      description: "remove [s]ymbols non-alphanumeric",
+      buyUpgrade: (increment, trackFrom, following) => {
+        this.tracks
+          .filter((_, index) => index >= trackFrom && index <= trackFrom + following)
+          .forEach((track) => {
+              if(track.addFlag("s")) {
+                  track.text = stringGenerator({length: 240}, track.flags);
+              }
+      })
       },
+      costCalculation: function (incr) {
+        if (this.owned === 0 || this.owned == 1) return this.baseCost;
+        return Math.round(
+          this.baseCost + this.owned * this.baseCost * this.costMult * incr
+        );
+      },
+    },
+    {
+      id: 4,
+      hotkey: "M",
+      baseCost: 10,
+      costMult: 1.8,
+      owned: 0,
+      description: "add a [M]onkey",
+      buyUpgrade: (increment, trackFrom, following) => {
+        this.tracks
+          .filter((_, index) => index >= trackFrom && index <= trackFrom + following)
+          .forEach((track, index) => {
+            this.monkeyList.push(track.addMonkey());
+          });
+      },
+      costCalculation: function (incr) {
+        if (this.owned === 0 || this.owned == 1) return this.baseCost;
+        return Math.round(
+          this.baseCost + this.owned * this.baseCost * this.costMult * incr
+        );
+      },
+    },
   ];
+
+  monkeyList: Monkey[] = [];
 
   setScore(newScore: number) {
     this.score = newScore;
@@ -239,7 +325,7 @@ export class Engine {
     this.upgradeList[0].owned = trackNum;
     for (let i = 0; i < trackNum; i++) {
       this.tracks.push(
-        new Track(stringGenerator({ length: 240 }), 10, 15 + i * 25)
+        new Track(i ,stringGenerator({ length: 240 }), 10, 15 + i * 25)
       );
       //console.log("Created track at: x: ", 10, " y:", 15+i*25 )
     }
@@ -257,6 +343,7 @@ export class Engine {
       var lastTrack = this.tracks[this.tracks.length - 1];
       this.tracks.push(
         new Track(
+          lastTrack.id + 1,
           stringGenerator({ length: 240 }),
           lastTrack.x,
           lastTrack.y + 25
@@ -267,6 +354,24 @@ export class Engine {
   }
 
   update(delta: number) {
+    // First we handle monkeys if we have to
+    if(this.tickCount % this.monkeyTickRate === 0) {
+      let counter = 0;
+      for(const m of this.monkeyList) {
+        m.addChar(true);
+        let val = m.assignedTrack.applyMonkey();
+        if(val > 0) {
+          counter += val
+          m.assignedTrack.dirty = true;
+          this.dirty = true;
+        }
+      }
+      if(counter > 0)
+        this.setScore(this.score + counter);
+    }
+
+    this.tickCount += 1;
+
     while (this.inputBuffer.length > 0) {
       const event = this.inputBuffer.shift()!;
 
